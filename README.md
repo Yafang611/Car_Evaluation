@@ -4,8 +4,9 @@ Data source: https://www.kaggle.com/elikplim/car-evaluation-data-set.
 
 Applied Methods:
 
-KNN.R: KNN. (date: 2021-09-25 add confusion matrix)
-Bayesian_Methods.R: KNN. (date: 2021-09-26)
+01. KNN.R: KNN. (date: 2021-09-25 add confusion matrix)
+
+02. Bayesian_Methods.R: KNN. (date: 2021-09-26)
 
 .... (ongoing)
 
