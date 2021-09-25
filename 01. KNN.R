@@ -25,6 +25,17 @@ library(fastDummies)
 data1 <- data0 %>%
   dummy_cols(select_columns = vars1) %>%
   select(-vars1) # remove the original columns except for the decision columns.
+
+data1_decision_dummy <- data1 %>%
+  dummy_cols(select_columns = "decision")
+View(data1_decision_dummy)
+
+library(corrplot)
+data1_decision_dummy %>%
+  select(-decision) %>%
+  cor()%>%
+  corrplot()
+
 View(data1)
 
 split <- sample(nrow(data1)*0.8)
@@ -63,8 +74,8 @@ ggplot(mean_values_convert, aes(x = k_value, y = mean_values)) +
 # Therefore, for this case, k = 2
 mdl_selected <- knn(train = train[,-1], test = data1[,-1], cl = train_decision, k = 2)
 data2 <- data1 %>%
-  mutate(predictions = mdl_selected) %>%
-  mutate(accuracy = (decision == mdl_selected))
+  mutate(predictions_KNN = mdl_selected) %>%
+  mutate(accuracy_KNN = (decision == mdl_selected))
 
 View(data2)
 
@@ -75,18 +86,20 @@ data2 %>%
 
 # Build a multiclass confusion matrix with confusion_matrix()
 library(cvms) # confusion_matrix(): Whereas evaluate() - another build a confusion matrix method - takes a data frame as input, confusion_matrix() takes a vector of targets and a vector of predictions.
-confusion_mat <- confusion_matrix(targets = data2$decision, predictions = data2$predictions)
+confusion_mat_KNN <- confusion_matrix(targets = data2$decision, predictions = data2$predictions_KNN)
 # The output includes the confusion matrix tibble and related metrics.
 # plot the multiclass confusin matrix
-str(confusion_mat)
-plot_confusion_matrix(confusion_mat$`Confusion Matrix`[[1]])
+str(confusion_mat_KNN)
+plot_confusion_matrix(confusion_mat_KNN$`Confusion Matrix`[[1]])
 
 #Adding sum titles: overall distribution of predictions and targets
-plot_confusion_matrix(confusion_mat$`Confusion Matrix`[[1]],
+plot_confusion_matrix(confusion_mat_KNN$`Confusion Matrix`[[1]],
                       add_sums = TRUE,
                       palette = "Oranges")
 
-confusion_mat$`Overall Accuracy` # Balanced accuracy is a metric that one can use when evaluating how good a binary classifier is
-confusion_mat$Sensitivity # TP/(TP+FN) 真正的结果是positive的，但是猜测有对有错
-confusion_mat$Specificity # TN/(FP+TN) 真正的结果是negative的，但是猜测有对有错
+conf_mat_KNN <- tibble("Accuracy", "Sensitivity", "Specificity")
+conf_mat_KNN[1] <- confusion_mat_KNN$`Overall Accuracy` # Balanced accuracy is a metric that one can use when evaluating how good a binary classifier is
+conf_mat_KNN[2] <- confusion_mat_KNN$Sensitivity # TP/(TP+FN) 真正的结果是positive的，但是猜测有对有错
+conf_mat_KNN[3] <- confusion_mat_KNN$Specificity # TN/(FP+TN) 真正的结果是negative的，但是猜测有对有错
+conf_mat_KNN
 
